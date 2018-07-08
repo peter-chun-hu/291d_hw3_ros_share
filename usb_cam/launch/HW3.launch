@@ -1,0 +1,24 @@
+<launch>
+  <node name="usb_cam" pkg="usb_cam" type="usb_cam_node" output="screen" >
+    <param name="video_device" value="/dev/video0" />
+    <param name="image_width" value="800" />
+    <param name="image_height" value="450" />
+    <param name="pixel_format" value="yuyv" />
+    <param name="camera_frame_id" value="usb_cam_frame" />
+    <param name="io_method" value="mmap"/>
+    <param name="camera_info_url" type="string" value="file://$(find usb_cam)/head_camera_c920.yaml" />
+  </node>
+  
+  <node pkg="tf" type="static_transform_publisher" name="base_to_odom" args="0 0 0 0 0 0 odom base_link 100" />
+  <node pkg="tf" type="static_transform_publisher" name="cam_to_base" args="0 0 0 1.57 0 0 base_link usb_cam_frame 100"/>
+  
+  <node name="image_proc" pkg="image_proc" type="image_proc" ns="usb_cam">
+    <remap from="image_raw" to="/usb_cam/image_raw"/>
+  </node>
+
+  
+  <include file="$(find tuw_aruco)/launch/single_marker_live.launch" />
+  
+  <include file="$(find tuw_marker_slam)/launch/slam.launch" />
+
+</launch>
